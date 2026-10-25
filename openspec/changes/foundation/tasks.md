@@ -36,7 +36,7 @@ Labels follow the code ownership in `AGENTS.md`. Apply implements only `(agent)`
 
 ## 6. Maintainer decisions
 
-- [ ] 6.1 (human) Write `docs/adr/0001-architecture.md` (patterns adopted from AgentGate and the RAG Lab adaptations) and `docs/adr/0002-async-io.md`; verify each records context, decision, alternatives considered and consequences.
+- [x] 6.1 (human) Write `docs/adr/0001-architecture.md` (patterns adopted from AgentGate and the RAG Lab adaptations) and `docs/adr/0002-async-io.md`; verify each records context, decision, alternatives considered and consequences.
 - [ ] 6.2 (human) Review the ported architecture rules and the workspace slices against `AGENTS.md`; verify by approving the pull request.
 
 ## 7. Final verification
