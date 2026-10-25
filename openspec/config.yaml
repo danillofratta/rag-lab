@@ -1,0 +1,23 @@
+schema: spec-driven
+
+context: |
+  RAG Lab is a public learning and portfolio project. AGENTS.md is authoritative
+  for architecture, code ownership and test policy.
+  The RAG core (domain/rag, application/ports/rag, strategies, RAG gateways,
+  the cores of the RAG slices, evaluation, pipelines and ADRs) is written by the
+  human maintainer. Agents implement infrastructure, adapters, tooling and tests.
+  Write all artifacts in English.
+
+rules:
+  specs:
+    - Scenarios must be testable without real LLM, embedding or network calls, unless the requirement is explicitly about evaluation
+  tasks:
+    - Label every task (agent) or (human), following the code ownership in AGENTS.md
+    - Place (human) tasks before the (agent) tasks that depend on them
+    - Tests for human-owned code are (agent) tasks derived from spec scenarios, never from the implementation
+
+operations:
+  apply:
+    guidance:
+      - Implement only (agent) tasks and report open (human) tasks as blockers
+      - Never modify human-owned paths listed in AGENTS.md
