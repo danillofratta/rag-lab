@@ -1,8 +1,12 @@
 import socket
 import subprocess
 import sys
+import tomllib
+from pathlib import Path
 
 import pytest
+
+PYPROJECT = Path(__file__).resolve().parents[1] / "pyproject.toml"
 
 
 def test_outbound_socket_is_blocked() -> None:
@@ -27,11 +31,26 @@ async def test_event_loop_still_works_offline() -> None:
     await anyio.sleep(0)
 
 
-@pytest.mark.integration
-def test_integration_marker_is_excluded_by_default() -> None:
-    raise AssertionError("integration tests must not run in the default selection")
+def test_default_selection_excludes_integration_and_eval(pytester: pytest.Pytester) -> None:
+    """Run an inner session with the project's real pytest options, not a copy of them."""
+    options = tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))["tool"]["pytest"]["ini_options"]
+    markers = "\n    ".join(options["markers"])
+    pytester.makeini(f"[pytest]\naddopts = {options['addopts']}\nmarkers =\n    {markers}\n")
+    pytester.makepyfile(
+        """
+        import pytest
 
+        def test_unit():
+            pass
 
-@pytest.mark.eval
-def test_eval_marker_is_excluded_by_default() -> None:
-    raise AssertionError("eval tests must not run in the default selection")
+        @pytest.mark.integration
+        def test_integration():
+            pass
+
+        @pytest.mark.eval
+        def test_eval():
+            pass
+        """
+    )
+    result = pytester.runpytest_inprocess()
+    result.assert_outcomes(passed=1, deselected=2)

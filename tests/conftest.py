@@ -6,6 +6,8 @@ from typing import Any
 
 import pytest
 
+pytest_plugins = ["pytester"]
+
 
 @pytest.fixture(autouse=True)
 def offline(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) -> None:
