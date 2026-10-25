@@ -72,7 +72,9 @@ Shared middleware in `transport/`: request ID (accept a well-formed incoming `X-
 
 ### 8. Local services
 
-`infra/docker-compose.yml` runs Postgres and Qdrant with pinned versions, health checks, named volumes and `127.0.0.1` port bindings. Langfuse runs under the `observability` profile following its official self-hosting layout (web, worker, ClickHouse, Redis, S3-compatible storage and its own Postgres database). Required variables use `${VAR:?message}` so a missing value stops compose with a clear message.
+`infra/docker-compose.yml` runs Postgres and Qdrant with pinned versions, health checks, named volumes and `127.0.0.1` port bindings. Langfuse lives in a separate `infra/docker-compose.observability.yml` whose services all carry the `observability` profile, following its official self-hosting layout (web, worker, ClickHouse, Redis, S3-compatible storage and its own Postgres database). It starts only when both the file and the profile are selected: `docker compose --env-file .env -f infra/docker-compose.yml -f infra/docker-compose.observability.yml --profile observability up -d --wait`. Required variables use `${VAR:?message}` so a missing value stops compose with a clear message.
+
+*Why a separate file:* Compose interpolates required variables of services in inactive profiles too, so a single file would make the default stack demand Langfuse credentials. *Env file:* Compose reads `.env` from the compose file's folder, so commands pass `--env-file .env` for the repository file. *Storage image:* MinIO no longer publishes images on Docker Hub, so the Langfuse object store uses the Chainguard MinIO image pinned by digest.
 
 ### 9. Continuous integration
 

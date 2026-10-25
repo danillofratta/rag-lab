@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Edit(/src/rag_lab/domain/rag/**)",
+      "Edit(/src/rag_lab/application/ports/rag/**)",
+      "Edit(/src/rag_lab/infrastructure/strategies/**)",
+      "Edit(/src/rag_lab/infrastructure/gateways/vector_index/**)",
+      "Edit(/src/rag_lab/infrastructure/gateways/llm/**)",
+      "Edit(/src/rag_lab/infrastructure/gateways/tracing/**)",
+      "Edit(/src/rag_lab/features/index_document/command.py)",
+      "Edit(/src/rag_lab/features/index_document/handler.py)",
+      "Edit(/src/rag_lab/features/index_document/result.py)",
+      "Edit(/src/rag_lab/features/index_document/nodes.py)",
+      "Edit(/src/rag_lab/features/index_document/workflow.py)",
+      "Edit(/src/rag_lab/features/ask_question/command.py)",
+      "Edit(/src/rag_lab/features/ask_question/handler.py)",
+      "Edit(/src/rag_lab/features/ask_question/result.py)",
+      "Edit(/src/rag_lab/features/ask_question/nodes.py)",
+      "Edit(/src/rag_lab/features/ask_question/workflow.py)",
+      "Edit(/src/rag_lab/features/generate_test_questions/command.py)",
+      "Edit(/src/rag_lab/features/generate_test_questions/handler.py)",
+      "Edit(/src/rag_lab/features/generate_test_questions/result.py)",
+      "Edit(/src/rag_lab/features/generate_test_questions/nodes.py)",
+      "Edit(/src/rag_lab/features/generate_test_questions/workflow.py)",
+      "Edit(/eval/benchmark/**)",
+      "Edit(/eval/metrics/**)",
+      "Edit(/eval/runners/**)",
+      "Edit(/pipelines/**)",
+      "Edit(/docs/adr/**)"
+    ]
+  }
+}
