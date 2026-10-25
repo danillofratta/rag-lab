@@ -1,0 +1,57 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "rag-lab"
+version = "0.1.0"
+description = "An open lab to build, run and compare retrieval-augmented generation pipelines"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115,<1",
+    "pydantic>=2.10,<3",
+    "pydantic-settings>=2.7,<3",
+    "uvicorn>=0.30,<1",
+    "psycopg[binary,pool]>=3.2,<4",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3,<9",
+    "anyio>=4.6,<5",
+    "httpx>=0.28,<1",
+    "ruff>=0.11,<1",
+    "mypy>=1.15,<2",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rag_lab"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers -m 'not integration and not eval'"
+pythonpath = ["src", "."]
+markers = [
+    "integration: needs the docker-compose services (Postgres, Qdrant)",
+    "eval: calls real models or LLM judges and runs in the separate evaluation job",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/architecture/*" = ["E501"]  # long source-string fixtures
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src"]
+
+[tool.uv]
+required-version = ">=0.12.5"

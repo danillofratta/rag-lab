@@ -204,7 +204,8 @@ uv run --locked mypy --strict src
 openspec validate --all --strict
 ```
 
-Integration tests: `docker compose -f infra/docker-compose.yml up -d --wait`, then
+Integration tests: `docker compose --env-file .env -f infra/docker-compose.yml up -d --wait`
+(Compose reads `.env` from the compose file's folder, so pass the repository one), then
 `uv run --locked pytest -m integration`. Architecture tests are part of Pytest
 and enforce the dependency rules, slice isolation, CQRS roles, constructor
 injection, `langgraph` confinement to `workflow.py` and concrete strategy imports

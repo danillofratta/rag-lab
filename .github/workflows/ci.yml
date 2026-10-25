@@ -1,0 +1,106 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Quality gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out source
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+        with:
+          version: "0.12.5"
+          python-version: "3.12.14"
+          enable-cache: false
+
+      - name: Install locked Python dependencies
+        run: uv sync --locked
+
+      - name: Set up Node for OpenSpec
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.16.0"
+
+      - name: Install pinned OpenSpec CLI
+        run: npm install --global --ignore-scripts --no-audit --no-fund @fission-ai/openspec@1.14.3
+
+      - name: Pytest (unit and architecture tests)
+        run: uv run --locked pytest -m "not integration and not eval"
+
+      - name: Ruff lint
+        run: uv run --locked ruff check .
+
+      - name: Ruff formatting
+        run: uv run --locked ruff format --check .
+
+      - name: Mypy strict
+        run: uv run --locked mypy --strict src
+
+      - name: OpenSpec strict validation
+        run: openspec validate --all --strict
+
+  integration:
+    name: Integration tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out source
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+        with:
+          version: "0.12.5"
+          python-version: "3.12.14"
+          enable-cache: false
+
+      - name: Install locked Python dependencies
+        run: uv sync --locked
+
+      - name: Generate ephemeral credentials
+        run: |
+          {
+            echo "POSTGRES_PASSWORD=$(openssl rand -hex 24)"
+            echo "QDRANT_API_KEY=$(openssl rand -hex 24)"
+          } > .env
+          set -a && source .env && set +a
+          echo "RAG_LAB_DATABASE_URL=postgresql://rag_lab:${POSTGRES_PASSWORD}@127.0.0.1:5432/rag_lab" >> .env
+
+      - name: Start Postgres and Qdrant
+        run: docker compose -f infra/docker-compose.yml --env-file .env up -d --wait
+
+      - name: Apply migrations
+        run: |
+          set -a && source .env && set +a
+          uv run --locked python -m rag_lab.infrastructure.persistence.migrate
+
+      - name: Pytest (integration)
+        run: |
+          set -a && source .env && set +a
+          uv run --locked pytest -m integration
+
+      - name: Stop services
+        if: always()
+        run: docker compose -f infra/docker-compose.yml --env-file .env down -v
