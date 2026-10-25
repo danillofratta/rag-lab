@@ -2,7 +2,7 @@
 
 import asyncio
 from pathlib import Path
-from typing import Any, LiteralString, cast
+from typing import Any
 
 from psycopg import AsyncConnection
 
@@ -38,7 +38,7 @@ async def apply_migrations(
             raise MigrationError(f"Migration would be applied out of order: {pending[0].version}")
         for migration in pending:
             async with connection.transaction():
-                await connection.execute(cast(LiteralString, migration.sql))
+                await connection.execute(migration.sql)
                 await connection.execute(
                     "insert into schema_migrations (version, checksum) values (%s, %s)",
                     (migration.version, migration.checksum),

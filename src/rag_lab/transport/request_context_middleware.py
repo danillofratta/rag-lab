@@ -70,7 +70,7 @@ class RequestContextMiddleware:
     def _request_id(scope: Scope) -> str:
         for name, value in scope["headers"]:
             if name == HEADER.encode():
-                candidate = value.decode("latin-1")
+                candidate: str = value.decode("latin-1")
                 if _WELL_FORMED.fullmatch(candidate):
                     return candidate
         return uuid4().hex

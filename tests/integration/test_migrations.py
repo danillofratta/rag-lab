@@ -2,6 +2,7 @@ import shutil
 from datetime import timedelta
 
 import pytest
+from psycopg.errors import DivisionByZero
 
 from rag_lab.domain.shared.value_objects.session_token_hash import SessionTokenHash
 from rag_lab.domain.shared.value_objects.workspace_id import WorkspaceId
@@ -67,7 +68,7 @@ async def test_a_failing_migration_leaves_no_partial_effect(connection, tmp_path
     (tmp_path / "0002_broken.sql").write_text(
         "create table half_done (id int);\nselect 1/0;", encoding="utf-8"
     )
-    with pytest.raises(Exception):
+    with pytest.raises(DivisionByZero):
         await apply_migrations(connection, tmp_path)
     cursor = await connection.execute("select to_regclass('half_done') is null")
     assert (await cursor.fetchone())[0] is True

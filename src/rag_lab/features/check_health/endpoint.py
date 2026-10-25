@@ -17,7 +17,11 @@ async def live() -> LiveResponse:
     return LiveResponse(status="ok")
 
 
-@router.get("/health/ready", response_model=ReadyResponse, responses={503: {"model": ReadyResponse}})
+@router.get(
+    "/health/ready",
+    response_model=ReadyResponse,
+    responses={503: {"model": ReadyResponse}},
+)
 async def ready(
     handler: Annotated[CheckHealthHandler, Depends(provide_check_health_handler)],
 ) -> JSONResponse:

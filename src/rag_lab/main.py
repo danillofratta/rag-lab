@@ -5,7 +5,7 @@ from functools import partial
 from fastapi import FastAPI
 
 from rag_lab.components import ComponentsOpener
-from rag_lab.dependencies import open_components
+from rag_lab.dependencies import build_log_handler, open_components
 from rag_lab.features.check_health.endpoint import router as check_health_router
 from rag_lab.features.create_workspace.endpoint import router as create_workspace_router
 from rag_lab.features.get_current_workspace.endpoint import (
@@ -23,7 +23,7 @@ def create_app(settings: Settings | None = None, opener: ComponentsOpener | None
     """Build the API: settings, resources, middleware, error handling and feature routers."""
     active = settings or load_settings()
     open_resources = opener or partial(open_components, active)
-    configure_logging(active.log_level)
+    configure_logging(build_log_handler(), active.log_level)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:

@@ -1,5 +1,6 @@
 """The composition root: the only place concrete adapters are constructed and wired."""
 
+import logging
 import re
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -28,10 +29,22 @@ from rag_lab.infrastructure.runtime.secrets_session_token_generator import (
 from rag_lab.infrastructure.runtime.system_clock import SystemClock
 from rag_lab.infrastructure.runtime.uuid_workspace_id_generator import UuidWorkspaceIdGenerator
 from rag_lab.infrastructure.settings.settings import Settings
+from rag_lab.transport.json_formatter import JsonFormatter
+from rag_lab.transport.request_id_filter import RequestIdFilter
+from rag_lab.transport.sensitive_data_filter import SensitiveDataFilter
 
 # 32 random bytes encode to 43 URL-safe characters; anything else cannot be a session token.
 _SESSION_TOKEN = re.compile(r"[A-Za-z0-9_-]{43}")
 _bearer = HTTPBearer(auto_error=False)
+
+
+def build_log_handler() -> logging.Handler:
+    """The structured handler: JSON lines stamped with the request id and sanitized."""
+    handler = logging.StreamHandler()
+    handler.setFormatter(JsonFormatter())
+    handler.addFilter(RequestIdFilter())
+    handler.addFilter(SensitiveDataFilter())
+    return handler
 
 
 def build_components(settings: Settings, pool: AsyncConnectionPool[Any]) -> Components:
